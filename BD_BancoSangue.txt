@@ -1,0 +1,263 @@
+
+-- -----------------------------------------------------
+-- Schema banco_sangue
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS banco_sangue ;
+
+-- -----------------------------------------------------
+-- Schema banco_sangue
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS banco_sangue DEFAULT CHARACTER SET UTF8MB4 ;
+USE banco_sangue ;
+
+-- -----------------------------------------------------
+-- Table TpSang
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS TpSang (
+  idTpSang INT NOT NULL COMMENT 'Código do Tipo Sanguíneo',
+  dscTpSang VARCHAR(2) NOT NULL COMMENT 'Descrição do Tipo Sanguíneo',
+  RhTpSang CHAR(1) NOT NULL COMMENT 'RH do Tipo Sanguíneo',
+  PRIMARY KEY (idTpSang))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = UTF8MB4;
+
+
+-- -----------------------------------------------------
+-- Table UF
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS UF (
+  idUF CHAR(2) NOT NULL,
+  dscUF VARCHAR(50) NOT NULL,
+  PRIMARY KEY (idUF))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table Cidade
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Cidade (
+  idCidade INT NOT NULL,
+  dscCidade VARCHAR(45) NOT NULL,
+  idUF CHAR(2) NOT NULL,
+  PRIMARY KEY (idCidade),
+  INDEX fk_Cidade_UF1_idx (idUF ASC),
+  CONSTRAINT fk_Cidade_UF1
+    FOREIGN KEY (idUF)
+    REFERENCES UF (idUF)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table Bairro
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Bairro (
+  idBairro INT NOT NULL,
+  dscBairro VARCHAR(45) NOT NULL,
+  idCidade INT NOT NULL,
+  PRIMARY KEY (idBairro),
+  INDEX fk_Bairro_Cidade1_idx (idCidade ASC),
+  CONSTRAINT fk_Bairro_Cidade1
+    FOREIGN KEY (idCidade)
+    REFERENCES Cidade (idCidade)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table doador
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS doador (
+  codDoador INT NOT NULL COMMENT 'Código do Doador',
+  idTpSang INT NOT NULL COMMENT 'Código do Tipo do Doador - FK',
+  nomDoador VARCHAR(40) NOT NULL COMMENT 'Nome do Doador',
+  idBairro INT NOT NULL COMMENT 'Código do Bairro - FK',
+  PRIMARY KEY (codDoador),
+  INDEX fk_doador_TipoSanguineo1 (idTpSang ASC),
+  INDEX fk_doador_Bairro1_idx (idBairro ASC),
+  CONSTRAINT fk_doador_TipoSanguineo1
+    FOREIGN KEY (idTpSang)
+    REFERENCES TpSang (idTpSang),
+  CONSTRAINT fk_doador_Bairro1
+    FOREIGN KEY (idBairro)
+    REFERENCES Bairro (idBairro)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = UTF8MB4;
+
+
+-- -----------------------------------------------------
+-- Table doacao
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS doacao (
+  codDoacao INT NOT NULL AUTO_INCREMENT,
+  codDoador INT NOT NULL,
+  datDoacao DATE NULL DEFAULT NULL,
+  qtdSanDoacao INT NULL DEFAULT NULL,
+  PRIMARY KEY (codDoacao),
+  INDEX CODDOADOR (codDoador ASC),
+  CONSTRAINT doacao_ibfk_1
+    FOREIGN KEY (codDoador)
+    REFERENCES doador (codDoador))
+ENGINE = InnoDB
+AUTO_INCREMENT = 15
+DEFAULT CHARACTER SET = UTF8MB4;
+-- -----------------------------------------------------
+-- Data for table TpSang
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (1, 'A', '-');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (2, 'AB', '-');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (3, 'O', '-');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (4, 'B', '-');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (5, 'A', '+');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (6, 'AB', '+');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (7, 'O', '+');
+INSERT INTO TpSang (idTpSang, dscTpSang, RhTpSang) VALUES (8, 'B', '+');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table UF
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO UF (idUF, dscUF) VALUES ('CE', 'Ceará');
+INSERT INTO UF (idUF, dscUF) VALUES ('SP', 'São Paulo');
+INSERT INTO UF (idUF, dscUF) VALUES ('PR', 'Paraná');
+INSERT INTO UF (idUF, dscUF) VALUES ('MS', 'Mato Grosso do Sul');
+INSERT INTO UF (idUF, dscUF) VALUES ('ES', 'Espírito Santo');
+INSERT INTO UF (idUF, dscUF) VALUES ('PE', 'Pernambuco');
+INSERT INTO UF (idUF, dscUF) VALUES ('MG', 'Minas Gerais');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table Cidade
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (1, 'Caucaia', 'CE');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (2, 'Ponta Grossa', 'PR');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (3, 'Ribeirão Pires', 'SP');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (4, 'Campo Grande', 'MS');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (5, 'São Mateus', 'ES');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (6, 'Recife', 'PE');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (7, 'Santo Antão', 'PE');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (8, 'Campo Mourão', 'MG');
+INSERT INTO Cidade (idCidade, dscCidade, idUF) VALUES (9, 'Brumado do Sul', 'MG');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table Bairro
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (10, 'Iparana', 1);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (20, 'Parque Estrela Dalva X', 2);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (30, 'Mecejana', 3);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (40, 'Comercial', 5);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (50, 'Polo Empresarial', 3);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (60, 'Colônia', 2);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (70, 'Tabapuá', 1);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (80, 'Oficinas', 4);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (15, 'Brejo Grande', 9);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (25, 'Carapicu de Dentro', 7);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (35, 'Lameirão', 8);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (45, 'Orvalho', 7);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (55, 'Assis de Abreu', 9);
+INSERT INTO Bairro (idBairro, dscBairro, idCidade) VALUES (65, 'Trevo', 6);
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table doador
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (1, 1, 'Edmar de Souza Pires', 80);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (2, 8, 'Ana Maria de Lima', 60);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (3, 6, 'Edson Emiliano Quarto', 40);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (4, 3, 'Carlos Antônio Pereira', 80);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (5, 2, 'Marlene Luciana Silveira', 40);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (6, 1, 'Clara Agatha Simone', 10);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (7, 3, 'Nelson Alexandre Diogo Silveira', 30);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (8, 4, 'Betina Joana Drumond', 10);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (9, 8, 'Milena Antônia Sophia', 20);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (10, 2, 'Augusto Eduardo Alexandre Drumond', 30);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (11, 5, 'Larissa Maya Ana Lopes', 80);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (12, 4, 'Benedita Bianca', 70);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (13, 2, 'Carlos Lucas Caldeira', 40);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (14, 3, 'Fernando Pietro Alexandre Pereira', 20);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (15, 5, 'Osvaldo Gael da Paz', 10);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (16, 6, 'Olivia Josefa Luciana Campos', 30);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (17, 2, 'Washington Rodrigues', 45);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (18, 3, 'César Meireles Borges', 15);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (19, 1, 'Aldemar Vigário Perpétuo Socorro', 25);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (20, 5, 'Valdemiro Pedreira', 15);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (21, 7, 'Josemar Terreno', 35);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (22, 8, 'Liana Figueroa', 35);
+INSERT INTO doador (codDoador, idTpSang, nomDoador, idBairro) VALUES (23, 6, 'Elizete Almeida', 45);
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table doacao
+-- -----------------------------------------------------
+START TRANSACTION;
+USE banco_sangue;
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (1, 1, '2010-10-10', 350);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (2, 15, '2012-02-15', 300);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (3, 16, '2013-05-08', 280);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (4, 2, '2014-07-30', 320);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (5, 1, '2017-06-28', 380);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (6, 15, '2016-12-18', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (7, 2, '2000-11-30', 500);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (8, 3, '2007-05-18', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (9, 8, '2010-11-18', 295);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (10, 3, '2008-09-20', 350);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (11, 8, '2014-05-16', 145);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (12, 4, '2008-04-17', 450);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (13, 5, '2008-10-25', 420);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (14, 3, '2011-07-10', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (15, 2, '2001-10-14', 380);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (16, 6, '2014-09-30', 475);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (17, 16, '2001-10-18', 380);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (18, 4, '1999-02-25', 350);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (19, 8, '2005-01-31', 325);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (20, 7, '2018-10-30', 500);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (21, 9, '2020-01-25', 250);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (22, 6, '2017-10-29', 360);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (23, 9, '2015-10-31', 450);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (24, 10, '2017-02-27', 450);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (25, 7, '2020-02-15', 250);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (26, 11, '2019-08-20', 280);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (27, 11, '2018-01-21', 350);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (28, 13, '2017-12-30', 500);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (29, 14, '2021-01-10', 455);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (30, 17, '2021-02-24', 290);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (31, 13, '2020-07-20', 380);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (32, 8, '2019-09-14', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (33, 20, '2017-09-30', 480);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (34, 22, '2018-10-22', 390);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (35, 21, '2014-12-04', 395);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (36, 19, '2015-11-22', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (37, 14, '2018-10-24', 490);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (38, 16, '2019-05-18', 410);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (39, 22, '2018-08-17', 295);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (40, 19, '2019-11-27', 400);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (41, 21, '2016-10-19', 350);
+INSERT INTO doacao (codDoacao, codDoador, datDoacao, qtdSanDoacao) VALUES (42, 22, '2020-03-25', 415);
+
+COMMIT;
+
