@@ -1,0 +1,185 @@
+/* Exclui a base de dados RHcompany caso já exista: */
+DROP DATABASE IF EXISTS RHcompany;
+
+/* Cria a base de dados RHcompany */
+CREATE DATABASE RHcompany;
+
+/*Utiliza a base de dados criada */ 
+USE RHcompany;
+
+/* Cria a tabela PROJETO, com a chave primária numero  */
+CREATE TABLE PROJETO (
+    NUMERO       INT NOT NULL auto_increment,
+    NOME         VARCHAR(50),
+    LOCALIZACAO  VARCHAR(50),
+    PRIMARY KEY(numero)
+) DEFAULT CHARSET=utf8;
+
+/* Cria a tabela EMPREGADO, com a chave primária RG  */
+CREATE TABLE EMPREGADO (
+    RG             INT NOT NULL,    
+    NOME           VARCHAR(50),
+    CPF            VARCHAR(10),
+    DEPTO          INT,
+    RG_SUPERVISOR  INT,
+    SALARIO        DECIMAL(12,2),
+    DAT_INI_SAL    DATE,
+    SEXO           CHAR(1),
+    PRIMARY KEY(RG)
+) DEFAULT CHARSET=utf8;
+
+/* Cria a tabela DEPARTAMENTO, com a chave primária numero */
+CREATE TABLE DEPARTAMENTO (
+    NUMERO      INT NOT NULL AUTO_INCREMENT,
+    NOME        VARCHAR(50),
+    RG_GERENTE  INT,
+    PRIMARY KEY(Numero),
+  FOREIGN KEY(RG_GERENTE)
+    REFERENCES Empregado(RG));
+
+/* Cria a tabela DEPARTAMENTO, com a chave primária codigo */
+CREATE TABLE DEPENDENTE (
+    CODIGO           INT NOT NULL AUTO_INCREMENT,
+    RG_RESPONSAVEL   INT NOT NULL,
+    NOME_DEPENDENTE  CHAR(50),
+    NASCIMENTO       DATE,
+    RELACAO          CHAR(10),
+    SEXO             CHAR(1),
+    TIPO_DEPENDENCIA VARCHAR(20),
+    PRIMARY KEY(Codigo),
+    FOREIGN KEY(RG_RESPONSAVEL)
+    REFERENCES Empregado(RG));
+
+/* Cria a tabela EMPREGADO_PROJETO, com a chave primária codigo */
+CREATE TABLE EMPREGADO_PROJETO (
+    CODIGO          INT NOT NULL AUTO_INCREMENT,
+    RG_EMPREGADO    INT NOT NULL,
+    NUMERO_PROJETO  INT NOT NULL,
+    HORAS           INT,
+    PRIMARY KEY(Codigo),
+  FOREIGN KEY(RG_EMPREGADO)
+    REFERENCES Empregado(RG),
+  FOREIGN KEY(numero_projeto)
+    REFERENCES Projeto(Numero));
+
+/* Cria a tabela DEPARTAMENTO_PROJETO, com a chave primária codigo */
+CREATE TABLE IF NOT EXISTS DEPARTAMENTO_PROJETO (
+    CODIGO          INT NOT NULL AUTO_INCREMENT,
+    NUMERO_DEPTO    INT NOT NULL,
+    NUMERO_PROJETO  INT NOT NULL,
+    VL_INVEST       DECIMAL(12,2),
+    PRIMARY KEY(Codigo),
+    FOREIGN KEY(NUMERO_DEPTO)
+    REFERENCES DEPARTAMENTO(NUMERO),
+    FOREIGN KEY(numero_projeto)
+    REFERENCES Projeto(Numero));
+
+/* Cria a tabela HISTORICO_SALARIO, com a chave primária composta: RG e DAT_INI_SAL */
+CREATE TABLE IF NOT EXISTS HISTORICO_SALARIO (
+    RG              INT NOT NULL AUTO_INCREMENT,
+    DAT_INI_SAL     DATE NOT NULL,
+    DAT_FIM_SAL     DATE NOT NULL,
+    SALARIO         DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY(RG,DAT_INI_SAL),
+    FOREIGN KEY(RG)
+    REFERENCES EMPREGADO(RG));
+
+/* Cria a chave estrangeira RG_SUPERVISOR A PARTIR DO AUTO-RELACIONAMENTO DA TABELA EMPREGADO */
+ALTER TABLE EMPREGADO ADD CONSTRAINT FK_SUPERV_EMPR FOREIGN KEY (RG_SUPERVISOR) REFERENCES EMPREGADO(RG);
+
+/* Cria a chave estrangeira DEPTO A PARTIR DA TABELA DEPARTAMENTO DENTRO DA TABELA EMPREGADO */
+ALTER TABLE EMPREGADO ADD CONSTRAINT FK_DEPTO_EMPR FOREIGN KEY (DEPTO) REFERENCES DEPARTAMENTO(NUMERO);
+
+/* Insere dados na tabela Projeto  */
+INSERT INTO PROJETO (NOME, NUMERO, LOCALIZACAO) VALUES 
+('Oficina de Manutenção', 5, 'São Paulo'),
+('Motor de Celulose', 10, 'Rio Claro'),
+('Prédio Central Administrativo', 15, 'Campinas'),
+('Gerenciamento Meio Ambiente',20,'Vitória'),
+('Construção de Porto',25,'Salvador'),
+('Desenvolvimento de Estradas',30,'Rio de Janeiro'),
+('Pesquisa Agropecuária',35,'Barro Novo');
+
+/* Insere dados na tabela departamento */
+INSERT INTO DEPARTAMENTO (NOME, NUMERO, RG_GERENTE) VALUES 
+('Contabilidade', 1, NULL), 	  /*RG_GERENTE=5050 */
+('Engenharia Civil', 2, NULL), 	  /*RG_GERENTE=5412 */
+('Engenharia Mecânica', 3, NULL), /*RG_GERENTE=3030 */
+('Industrial', 4, NULL),
+('Recursos Humanos',5,NULL), /*RG_GERENTE=8080 */
+('Produção Civil',6,NULL); /*RG_GERENTE=4040 */
+
+ /* Insere dados na tabela Departamento_projeto */
+INSERT INTO DEPARTAMENTO_PROJETO (CODIGO, NUMERO_DEPTO, NUMERO_PROJETO,VL_INVEST) VALUES 
+(1, 2, 5,600000),
+(2, 3, 10,1000000),
+(3, 2, 10,870000),
+(4, 1, 15,900120),
+(5, 5, 20,320000),
+(6, 4, 25,1452000);
+
+/* Insere dados na tabela Empregado */
+INSERT INTO EMPREGADO (NOME, RG, CPF, DEPTO, RG_SUPERVISOR, SALARIO,DAT_INI_SAL, SEXO) VALUES 
+('Joana Luiza Petrúcio',    1010, 10107, 1, NULL, 5650,'2021/05/01','F'),
+('Fernanda Reis',           2020, 25417, 1, 1010, 5500,'2019/12/01','F'),
+('Ricardo Rossi',           3030, 18549, 2, 2020, 2300,'2021/08/01','M'),
+('Jorge Andrada',           4040, 65421, 2, 3030, 5200,'2018/10/01','M'),
+('Renata Oliveira',         5050, 70014, 2, 3030, 3390,'2022/02/01','F'),
+('João Antonio Pequiti',    5412, 39451, 2, 2020, 4520,'2010/06/01','M'),
+('Luiz Renato Fialho',      6060, 25104, 3, 2020, 3000,'2012/05/01','M'),
+('Antonio Reis Souza',      7011, 11447, 6, NULL, 4500,'1999/01/01','M'),
+('Luiz Fernando Moradilha', 7070, 45630, 3, 6060, 2000,'2018/08/01','M'),
+('Emanuelly Souza da Victória',8080,35214,5, NULL,2840,'2014/04/01','F'),
+('José Macedo Motta',       8989, 90555, 5, 3030, 1980,'2018/10/01','M'),
+('Ana Maria Bicalho Terra', 9090, 78844, 4, 7011, 3950,'2021/07/01','F'),
+('Vinicius Carminatti',     9595, 87970, 6, NULL, 7100,'2018/11/01','M'),
+('Maria Joaquina do Amaral',4540, 81004, 4, 7011, 5100,'2010/05/01','F');
+
+/* Insere dados na tabela Dependente */
+INSERT INTO DEPENDENTE (CODIGO, RG_RESPONSAVEL, NOME_DEPENDENTE, NASCIMENTO, TIPO_DEPENDENCIA, SEXO) VALUES 
+(1,1010,'Jorge Petrúcio', '2000/12/27','Filho(a)','M'),
+(2,1010,'Luiz Petrúcio', '2002/11/18','Filho(a)','M'),
+(3,2020,'Fernando Carlos Pascoal', '1989/02/14','Cônjuge','M'),
+(4,2020,'Ângelo Reis', '1995/02/10','Filho(a)','M'),
+(5,3030,'André Rossi', '1990/05/01','Filho(a)','M'),
+(6,6060,'Alberta Ferreira Gonzaga Fialho','1997/10/27','Cônjuge','F'),
+(7,6060,'Márcia Gonzaga Fialho','1998/07/31','Menor sob Guarda','F'),
+(8,8080,'Karla Cristina da Vitória','2001/05/09','Filho(a)','F'),
+(9,8080,'Carlos Cristóvão da Vitória','2019/04/30','Adotado(a)','M'),
+(10,8080,'Sofia Antares da Vitória','2004/08/02','Filho(a)','F'),
+(11,7011,'Cássia Souza','1999/08/25','Filho(a)','F'),
+(12,4540,'Matheus Antônio do Amaral','1999/09/25','Filho(a)','M'),
+(13,4540,'Andressa da Vitória','1995/08/25','Filho(a)','F');
+
+
+/* Insere dados na tabela Empregado_Projeto */
+INSERT INTO EMPREGADO_PROJETO (CODIGO, RG_EMPREGADO, NUMERO_PROJETO, HORAS) VALUES 
+(1, 2020, 5, 10),
+(2, 2020, 10, 25),
+(3, 3030, 5, 35),
+(4, 4040, 20, 50),
+(5, 5050, 20, 35),
+(6, 8080, 5,  70),
+(7, 4540, 25, 80),
+(8, 7011,30,28),
+(9, 5412,25,55);
+/* Insere dados na tabela Histórico de Salário */
+INSERT INTO HISTORICO_SALARIO (RG, DAT_INI_SAL, DAT_FIM_SAL, SALARIO) VALUES 
+(1010, '2016/01/01', '2018/11/30',2000),
+(1010, '2018/12/01', '2021/04/30',4000),
+(2020, '2007/05/01', '2012/12/31',2500),
+(2020, '2013/01/01', '2018/11/30',4000),
+(4040, '2010/10/01', '2012/10/31',1500),
+(4040,'2008/08/01', '2012/10/31',2550),
+(4040,'2012/11/01', '2016/12/31',3500),
+(4040,'2017/01/01', '2018/09/30',3800),
+(5050,'2018/06/01', '2022/01/31',2380),
+(7070,'2008/01/01', '2008/07/31',1000),
+(8989,'2015/07/01', '2018/09/30',2300),
+(9595,'2014/03/01', '2018/10/30',5000);
+/* Atualiza o Gerente dos departamentos que estavam vazios */
+UPDATE DEPARTAMENTO SET RG_GERENTE=5050 WHERE NUMERO=1;
+UPDATE DEPARTAMENTO SET RG_GERENTE=5412 WHERE NUMERO=2;
+UPDATE DEPARTAMENTO SET RG_GERENTE=3030 WHERE NUMERO=3;
+UPDATE DEPARTAMENTO SET RG_GERENTE=8080 WHERE NUMERO=5;
+UPDATE DEPARTAMENTO SET RG_GERENTE=4040 WHERE NUMERO=6;
